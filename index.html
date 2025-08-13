@@ -58,6 +58,28 @@ const consequences = [
     "your name is now on the list.", "-10000 aura."
 ];
 
+// Helper function to generate bonk message under character limit
+function generateBonkMessage() {
+    let message = '';
+    let attempts = 0;
+    
+    // Keep trying until we get a message under 390 characters (leaving buffer for NightBot)
+    do {
+        const item = getRandomItem(bonkItems);
+        const consequence = getRandomItem(consequences);
+        message = `⭒˚∘ you have been bonked by ${item}... ouch. ${consequence} ∘˚⭒`;
+        attempts++;
+        
+        // Prevent infinite loop - fallback after 50 attempts
+        if (attempts > 50) {
+            message = '⭒˚∘ you have been bonked by a mysterious object... ouch. you feel different. ∘˚⭒';
+            break;
+        }
+    } while (message.length > 390);
+    
+    return message;
+}
+
 // Helper function to get random item from array
 function getRandomItem(array) {
     return array[Math.floor(Math.random() * array.length)];
@@ -65,9 +87,7 @@ function getRandomItem(array) {
 
 // Main bonk endpoint - returns formatted message
 app.get('/bonk', (req, res) => {
-    const item = getRandomItem(bonkItems);
-    const consequence = getRandomItem(consequences);
-    const message = `⭒˚∘ you have been bonked by ${item}... ouch. ${consequence} ∘˚⭒`;
+    const message = generateBonkMessage();
     
     // Return plain text for NightBot
     res.set('Content-Type', 'text/plain');
@@ -76,13 +96,11 @@ app.get('/bonk', (req, res) => {
 
 // JSON endpoint for advanced users
 app.get('/bonk.json', (req, res) => {
-    const item = getRandomItem(bonkItems);
-    const consequence = getRandomItem(consequences);
+    const message = generateBonkMessage();
     
     res.json({
-        item: item,
-        consequence: consequence,
-        message: `⭒˚∘ you have been bonked by ${item}... ouch. ${consequence} ∘˚⭒`
+        message: message,
+        length: message.length
     });
 });
 
